@@ -25,26 +25,40 @@ yargs(hideBin(process.argv)).command({
     {
         console.log('Title: ' + argv.title + '\n')
         console.log('Body:\n\t' + argv.body)
-    },   
+    }
 }).command({
     command: 'remove',
     showInHelp : true,
     describe: 'Removes a note',
+    builder: {
+        title: {
+            describe: 'Note title to remove',
+            demandOption: true,
+            type: 'string'
+        }
+    },
     handler: function(){
         console.log(chalk.red('Removing the note!'))
-    },
+    }
 }).command({
     command: 'list',
     showInHelp : true,
     describe: 'List all notes',
     handler: function(){
         console.log(chalk.blue('List all note!'))
-    },
+    }
 }).command({
     command: 'read',
     showInHelp : true,
     describe: 'Read a note',
+    builder: {
+        title: {
+            describe: 'Note title to read',
+            demandOption: true,
+            type: 'string'
+        }
+    },
     handler: function(){
         console.log(chalk.yellow('Read the note!'))
-    },
+    }
 }).argv
