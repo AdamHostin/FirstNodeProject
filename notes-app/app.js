@@ -20,10 +20,10 @@ yargs(hideBin(process.argv)).command({
             type: 'string'
         }
     },
-    handler: function(argv)
-    {
+    handler(argv) {
         notes.addNotes(argv.title, argv.body)
-    }
+    } 
+
 }).command({
     command: 'remove',
     showInHelp : true,
@@ -35,16 +35,18 @@ yargs(hideBin(process.argv)).command({
             type: 'string'
         }
     },
-    handler: function(argv){
+    handler(argv) {
         notes.removeNote(argv.title)
     }
+
 }).command({
     command: 'list',
     showInHelp : true,
     describe: 'List all notes',
-    handler: function(){
-        console.log(chalk.blue('List all note!'))
+    handler(argv) {
+        notes.listNotes()
     }
+
 }).command({
     command: 'read',
     showInHelp : true,
@@ -56,7 +58,7 @@ yargs(hideBin(process.argv)).command({
             type: 'string'
         }
     },
-    handler: function(){
-        console.log(chalk.yellow('Read the note!'))
+    handler(argv) { 
+        notes.readNote(argv.title)
     }
 }).argv
