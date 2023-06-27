@@ -3,10 +3,6 @@ import chalk from "chalk"
 
 const notesFile = 'notes.json'
 
-export const getNotes = () => {
-    return 'Your notes...'
-}
-
 export const addNotes = (title, body) => {
     const notes = loadNotes()
     
