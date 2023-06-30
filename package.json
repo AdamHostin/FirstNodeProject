@@ -85,6 +85,7 @@
     "prelude-ls": "^1.2.1",
     "punycode": "^2.3.0",
     "queue-microtask": "^1.2.3",
+    "request": "^2.88.2",
     "resolve-from": "^4.0.0",
     "reusify": "^1.0.4",
     "rimraf": "^3.0.2",
