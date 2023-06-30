@@ -14,7 +14,7 @@ export const getWeather = (latitude, longitude, callback) =>{
             return
         }
         const Data = {
-            forecast: chalk.blue('Weather: ') + 'Current temperature ' + body.current_weather.temperature + 
+            forecast: 'Current temperature ' + body.current_weather.temperature + 
                 ' degrees celsius and precipitation in the past hour were ' + body.hourly.precipitation[date.getHours()] + ' mm'
         }
         callback(undefined, Data)
