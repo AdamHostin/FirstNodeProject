@@ -2,19 +2,21 @@ import request from 'request'
 import chalk from 'chalk';
 
 export const getWeather = (latitude, longitude, callback) =>{
-    const WeatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=' + latitude + '&longitude=' + longitude + '&current_weather=true&hourly=temperature_2m,precipitation'
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + latitude + '&longitude=' + longitude + '&current_weather=true&hourly=temperature_2m,precipitation'
     let date = new Date();
-    request({url: WeatherUrl, json: true}, (error, response) => {
+    request({url, json: true}, (error, {body} = {}) => {
         if(error){
             callback('Unable to connect to weather API', undefined)
-        }else if(response.body.error){
-            callback(response.body.reason, undefined)
-        }else{
-            const Data = {
-                forecast: chalk.blue('Weather: ') + 'Current temperature ' + response.body.current_weather.temperature + 
-                    ' degrees celsius and precipitation in the past hour were ' + response.body.hourly.precipitation[date.getHours()] + ' mm'
-            }
-            callback(undefined, Data)
+            return
+        } 
+        if(body.error){
+            callback(body.reason, undefined)
+            return
         }
+        const Data = {
+            forecast: chalk.blue('Weather: ') + 'Current temperature ' + body.current_weather.temperature + 
+                ' degrees celsius and precipitation in the past hour were ' + body.hourly.precipitation[date.getHours()] + ' mm'
+        }
+        callback(undefined, Data)
     })
 }
