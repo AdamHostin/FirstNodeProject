@@ -1,6 +1,6 @@
 import express from 'express'
 import chalk from 'chalk'
-import * as weather from './../../weather-app/app.js'
+import * as weather from './../../weather-app/utils/weather.js'
 import path from 'path';
 import { fileURLToPath } from 'url';
 import hbs from 'hbs'
@@ -24,7 +24,7 @@ app.get('', (req, res) => {
     res.render('index', {
         title: 'Weather App',
         name: 'Hostinko'
-    })
+    }) 
 })
 
 app.get('/about', (req, res) => {
@@ -43,12 +43,19 @@ app.get('/help', (req, res) => {
 })
 
 app.get('/weather', (req, res) => {
-    weather.getWeatherByLocation('Smolenice', (error,data) => {
+    if (!req.query.address){
+        return res.send({
+            error: 'missing address parameter'
+        })
+    } 
+
+    weather.getWeatherByLocation( req.query.address, (error,data) => {
         if(error){
             console.log(error)
-            res.send('Error occurred')
+            res.send(error)
+            return
         }
-        //res.send(data.location + '<br>' + data.forecast)
+        data['queryedAddress'] = req.query.address
         res.send(data)
     }) 
 })
