@@ -58,7 +58,7 @@ app.get('/weather', (req, res) => {
         data['queryedAddress'] = req.query.address
         res.send(data)
     }) 
-})
+}) 
 
 app.get('/help/*', (req, res) => {
     res.render('notFound', {
