@@ -15,7 +15,8 @@ export const getWeather = (latitude, longitude, callback) =>{
         }
         const Data = {
             forecast: 'Current temperature ' + body.current_weather.temperature + 
-                ' degrees celsius and precipitation in the past hour were ' + body.hourly.precipitation[date.getHours()] + ' mm'
+                ' degrees celsius, precipitation in the past hour were ' + body.hourly.precipitation[date.getHours()] + 
+                ' mm and windspeed is ' + body.current_weather.windspeed + ' km/h'
         }
         callback(undefined, Data)
     })
