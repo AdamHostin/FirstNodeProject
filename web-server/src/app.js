@@ -19,8 +19,6 @@ hbs.registerPartials(partialsDir)
 //setup static dir
 app.use(express.static(publicDir))
 const port = process.env.PORT || 3000
-console.log(port)
-
 
 app.get('', (req, res) => {
     res.render('index', {
@@ -79,5 +77,5 @@ app.get('*', (req, res) => {
 })
 
 app.listen(port, () =>{ 
-    console.log(chalk.green('Server is up on port 3000'))
+    console.log(chalk.green('Server is up on port' + port))
 }) 
