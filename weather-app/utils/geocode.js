@@ -13,7 +13,7 @@ export const getGeocode = (address, callback ) => {
             return
         }
         if(body.features.length === 0){
-            callback('Unable find location', undefined)
+            callback('Unable to find location', undefined)
             return
         }
         const data = {
