@@ -1,7 +1,9 @@
 import mongoose from "mongoose"
 import validator from "validator"
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
-export const User = mongoose.model('User', {
+const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -20,6 +22,7 @@ export const User = mongoose.model('User', {
         type: String,
         required: true,
         trim: true,
+        unique: true,
         lowercase: true,
         validate(value){
             if(!validator.isEmail(value)){
@@ -37,5 +40,46 @@ export const User = mongoose.model('User', {
                 throw new Error('Password cannot include \'password\' substring')
             }
         }
-    }
+    },
+    tokens:[{
+        token:{
+            type: String,
+            required: true
+        }
+    }]
 })
+
+userSchema.statics.findByCredentials = async ({email,password} = {}) => {
+    const user = await User.findOne({email})
+    if(!user){
+        console.log('wrong email')
+        throw new Error('unable to login')
+    }
+    const bTestPsswd = await bcrypt.compare(password, user.password)  
+    if(!bTestPsswd){
+        console.log('wrong password')
+        throw new Error('unable to login')   
+    }
+    console.log("valid password entered yay")
+    return user 
+}
+
+userSchema.methods.generateToken = async function () {
+    const token = jwt.sign({ _id: this._id.toString()}, 'MyFirstDB')
+    this.tokens = this.tokens.concat({token})
+    await this.save()
+    return token
+}
+
+//Hash password before save
+userSchema.pre('save', async function (next){
+    if(this.isModified('password')){
+        this.password = await bcrypt.hash(this.password,8)
+    }
+    next()
+})
+
+const UserModel = mongoose.model('User', userSchema)
+UserModel.createIndexes()
+
+export const User = UserModel

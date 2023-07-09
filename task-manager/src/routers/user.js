@@ -1,5 +1,14 @@
 import express from "express";
 import { User } from "../models/user.js";
+import * as utils from '../utils/utils.js'
+
+/* const hashPsswd = async (password) => {
+    return bcrypt.hash(password,8)
+}
+
+const isMatchingPsswd = async (hash, password) => {
+    return bcrypt.compare(password, hash)
+} */
 
 export const router = new express.Router()
 
@@ -7,9 +16,10 @@ router.post('/users', async (req, res) =>{
     const newUser = User(req.body)
     try {
         await newUser.save()
-        res.status(201).send(newUser)
+        const token = await newUser.generateToken()
+        res.status(201).send({newUser,  token})
     } catch(e) {
-        res.status(400).send(e)
+        res.status(400).send({error: 'unable to create user'})
     }
 })
 
@@ -42,20 +52,33 @@ router.get('/users/:id', async (req,res) =>{
 })
 
 router.patch('/users/:id', async (req, res) => {
-    if(!IsUpdateAllowed(req.body, ['name', 'email', 'password', 'age'])){
+    if(!utils.IsUpdateAllowed(req.body, ['name', 'email', 'password', 'age'])){
         res.status(400).send({error: 'invalid key'})
         return
     }
     try{
-        const result = await User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        const result = await User.findById(req.params.id)
+        Object.keys(req.body).forEach(element => result[element] = req.body[element]);
+        await result.save()
         if (!result){
             res.status(404).send({error: 'user not found'})
             return
-        }
-        res.status(200).send(result)
+        }     
+        res.status(200).send(result) 
     } catch (e) {
         console.log(e)
         res.status(400).send(e)
+    }
+})
+
+router.post('/users/login', async (req,res) => {
+    try {
+        const user = await User.findByCredentials(req.body)
+        const token = await user.generateToken()
+        res.send({message : 'login successful', user, token})
+    } catch (e){
+        console.log(e)
+        res.status(400).send({ error: 'Unable to login'})
     }
 })
 

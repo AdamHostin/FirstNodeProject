@@ -1,5 +1,6 @@
 import express from "express";
 import { Task } from "../models/task.js";
+import * as utils from '../utils/utils.js'
 
 
 export const router = new express.Router()
@@ -44,12 +45,14 @@ router.get('/tasks/:id', async (req,res) =>{
 })
 
 router.patch('/tasks/:id', async (req, res) => {
-    if(!IsUpdateAllowed(req.body, ['description', 'completed'])){
+    if(!utils.IsUpdateAllowed(req.body, ['description', 'completed'])){
         res.status(400).send({error: 'invalid key'})
         return
     }
     try{
-        const result = await Task.findByIdAndUpdate(req.params.id, req.body , {new: true, runValidators: true})
+        const result = await Task.findById(req.params.id)
+        Object.keys(req.body).forEach((key) => result[key] = req.body[key])
+        await result.save()
         if (!result){
             res.status(404).send({error: 'task not found'})
             return
