@@ -82,6 +82,16 @@ userSchema.methods.removeAllTokens = async function () {
     await this.save()
 }
 
+userSchema.methods.toJSON = function () {
+    const userObject = this.toObject()
+    
+    delete userObject.password
+    delete userObject.tokens
+    
+    return userObject
+}
+
+
 //Hash password before save
 userSchema.pre('save', async function (next){
     if(this.isModified('password')){
