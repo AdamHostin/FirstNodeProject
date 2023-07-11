@@ -1,6 +1,7 @@
 import express from "express";
 import { User } from "../models/user.js";
 import * as utils from '../utils/utils.js'
+import * as auth from '../middleware/auth.js'
 
 /* const hashPsswd = async (password) => {
     return bcrypt.hash(password,8)
@@ -23,17 +24,22 @@ router.post('/users', async (req, res) =>{
     }
 })
 
-router.get('/users', async (req, res) => {
-    try{
-        const users = await User.find({})
-        res.status(200).send(users)
-    } catch(e) {
+router.post('/users/login',async (req,res) => {
+    try {
+        const user = await User.findByCredentials(req.body)
+        const token = await user.generateToken()
+        res.send({message : 'login successful', user, token})
+    } catch (e){
         console.log(e)
-        res.status(400).send(e)
-    }   
+        res.status(400).send({ error: 'Unable to login'})
+    }
 })
 
-router.get('/users/:id', async (req,res) =>{
+router.get('/users/me', auth.auth, async (req, res) => {
+    res.send(req.user)
+})
+
+router.get('/users/:id', auth.auth,async (req,res) =>{
     const id = req.params.id
         if(id.toString().length != 24){
             return res.status(400).send()
@@ -51,7 +57,7 @@ router.get('/users/:id', async (req,res) =>{
     }
 })
 
-router.patch('/users/:id', async (req, res) => {
+router.patch('/users/:id', auth.auth,async (req, res) => {
     if(!utils.IsUpdateAllowed(req.body, ['name', 'email', 'password', 'age'])){
         res.status(400).send({error: 'invalid key'})
         return
@@ -71,18 +77,7 @@ router.patch('/users/:id', async (req, res) => {
     }
 })
 
-router.post('/users/login', async (req,res) => {
-    try {
-        const user = await User.findByCredentials(req.body)
-        const token = await user.generateToken()
-        res.send({message : 'login successful', user, token})
-    } catch (e){
-        console.log(e)
-        res.status(400).send({ error: 'Unable to login'})
-    }
-})
-
-router.delete('/users/:id', async (req, res) => {
+router.delete('/users/:id', auth.auth,async (req, res) => {
     try{
         const result = await User.findByIdAndDelete(req.params.id)
         if (!result){
