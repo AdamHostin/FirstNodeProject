@@ -2,6 +2,7 @@ import mongoose from "mongoose"
 import validator from "validator"
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import { Console } from "console"
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -69,6 +70,16 @@ userSchema.methods.generateToken = async function () {
     this.tokens = this.tokens.concat({token})
     await this.save()
     return token
+}
+
+userSchema.methods.removeToken = async function (tokenToRemove) {
+    this.tokens = this.tokens.filter((element) =>  element.token !== tokenToRemove)
+    await this.save()
+}
+
+userSchema.methods.removeAllTokens = async function () {
+    this.tokens = []
+    await this.save()
 }
 
 //Hash password before save

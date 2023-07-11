@@ -15,11 +15,15 @@ export const router = new express.Router()
 
 router.post('/users', async (req, res) =>{
     const newUser = User(req.body)
+    console.log('creating user')
     try {
         await newUser.save()
+        console.log('generate token')
         const token = await newUser.generateToken()
+        console.log('response send')
         res.status(201).send({newUser,  token})
     } catch(e) {
+        console.log('error')
         res.status(400).send({error: 'unable to create user'})
     }
 })
@@ -32,6 +36,28 @@ router.post('/users/login',async (req,res) => {
     } catch (e){
         console.log(e)
         res.status(400).send({ error: 'Unable to login'})
+    }
+})
+
+router.post('/users/logout', auth.auth, async (req, res) =>{
+    console.log('logout started')
+    try {
+        await req.user.removeToken(req.token)
+        res.send({message : 'logout successful', tokens: req.user.tokens})
+    } catch (e){
+        console.log(e)
+        res.status(500).send({ error: 'Unable to logout', tokens: req.user.tokens})
+    }
+})
+
+router.post('/users/logoutAll', auth.auth, async (req, res) =>{
+    console.log('logout started')
+    try {
+        await req.user.removeAllTokens()
+        res.send({message : 'logout successful', tokens: req.user.tokens})
+    } catch (e){
+        console.log(e)
+        res.status(500).send({ error: 'Unable to logout', tokens: req.user.tokens})
     }
 })
 
