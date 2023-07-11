@@ -65,52 +65,25 @@ router.get('/users/me', auth.auth, async (req, res) => {
     res.send(req.user)
 })
 
-router.get('/users/:id', auth.auth,async (req,res) =>{
-    const id = req.params.id
-        if(id.toString().length != 24){
-            return res.status(400).send()
-        }
-    try {
-        const result = await User.findById(id)
-        if(!result){
-            res.status(404).send()
-            return
-        }
-        res.status(200).send(result)
-    } catch(e){
-        console.log(e)
-        res.status(500).send(e)
-    }
-})
-
-router.patch('/users/:id', auth.auth,async (req, res) => {
+router.patch('/users/me', auth.auth,async (req, res) => {
     if(!utils.IsUpdateAllowed(req.body, ['name', 'email', 'password', 'age'])){
         res.status(400).send({error: 'invalid key'})
         return
     }
     try{
-        const result = await User.findById(req.params.id)
-        Object.keys(req.body).forEach(element => result[element] = req.body[element]);
-        await result.save()
-        if (!result){
-            res.status(404).send({error: 'user not found'})
-            return
-        }     
-        res.status(200).send(result) 
+        Object.keys(req.body).forEach(element => req.user[element] = req.body[element]);
+        await req.user.save()
+        res.status(200).send(req.user) 
     } catch (e) {
         console.log(e)
         res.status(400).send(e)
     }
 })
 
-router.delete('/users/:id', auth.auth,async (req, res) => {
+router.delete('/users/me', auth.auth, async (req, res) => {
     try{
-        const result = await User.findByIdAndDelete(req.params.id)
-        if (!result){
-            res.status(404).send({error: 'user not found'})
-            return
-        }
-        res.status(200).send({ message: 'Deletion successful'})
+        await req.user.deleteOne({_id: req.user._id})
+        res.status(200).send({ message: 'Deletion successful', })
     } catch (e) {
         console.log(e)
         res.status(500).send(e)
