@@ -3,7 +3,6 @@ import { Task } from "../models/task.js";
 import * as utils from '../utils/utils.js'
 import * as auth from '../middleware/auth.js'
 
-
 export const router = new express.Router()
 
 router.post('/tasks', auth.auth, async (req, res) =>{
@@ -20,9 +19,12 @@ router.post('/tasks', auth.auth, async (req, res) =>{
     }
 })
 
-router.get('/tasks', async (req, res) => {
+router.get('/tasks', auth.auth, async (req, res) => {
     try{
-        const task = await Task.find({})
+        const task = await Task.find({owner: req.user._id})
+        //alternatively
+        //await req.user.populate(['tasks'])
+        //const task = req.user.tasks
         res.status(200).send(task)
     } catch(e){
         console.log(e)
@@ -30,13 +32,10 @@ router.get('/tasks', async (req, res) => {
     }
 })
 
-router.get('/tasks/:id', async (req,res) =>{
-    const id = req.params.id
-    if(id.toString().length != 24){
-        return res.status(400).send()
-    }
+router.get('/tasks/:id',auth.auth, async (req,res) =>{
     try{
-        const task = await Task.findById(id)
+        console.log(req.params.id)
+        const task = await Task.findOne({id: req.params._id, owner: req.user._id})
         if(!task){
             res.status(404).send()
             return
@@ -48,19 +47,19 @@ router.get('/tasks/:id', async (req,res) =>{
     }
 })
 
-router.patch('/tasks/:id', async (req, res) => {
+router.patch('/tasks/:id', auth.auth, async (req, res) => {
     if(!utils.IsUpdateAllowed(req.body, ['description', 'completed'])){
         res.status(400).send({error: 'invalid key'})
         return
     }
     try{
-        const result = await Task.findById(req.params.id)
-        Object.keys(req.body).forEach((key) => result[key] = req.body[key])
-        await result.save()
+        const result = await Task.findOne({_id: req.params.id, owner: req.user._id})
         if (!result){
             res.status(404).send({error: 'task not found'})
             return
         }
+        Object.keys(req.body).forEach((key) => result[key] = req.body[key])
+        await result.save()
         res.status(200).send(result)
     } catch (e) {
         console.log(e)
@@ -68,10 +67,11 @@ router.patch('/tasks/:id', async (req, res) => {
     }
 })
 
-router.delete('/tasks/:id', async (req, res) => {
+router.delete('/tasks/:id', auth.auth, async (req, res) => {
     try{
-        const result = await Tas.findByIdAndDelete(req.params.id)
-        if (!result){
+        const result = await Task.deleteOne({_id: req.params.id, owner: req.user._id})
+
+        if (result.deletedCount < 1){
             res.status(404).send({error: 'task not found'})
             return
         }

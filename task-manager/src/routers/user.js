@@ -14,6 +14,7 @@ const isMatchingPsswd = async (hash, password) => {
 export const router = new express.Router()
 
 router.post('/users', async (req, res) =>{
+    console.log(req.body)
     const newUser = User(req.body)
     console.log('creating user')
     try {
@@ -23,7 +24,7 @@ router.post('/users', async (req, res) =>{
         console.log('response send')
         res.status(201).send({newUser,  token})
     } catch(e) {
-        console.log('error')
+        console.log(e)
         res.status(400).send({error: 'unable to create user'})
     }
 })
