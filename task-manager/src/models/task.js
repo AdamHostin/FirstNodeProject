@@ -1,6 +1,6 @@
 import mongoose from "mongoose"
 
-export const Task = mongoose.model('Task', {
+const TaskSchema = mongoose.Schema({
     description: {
         type: String,
         required: true,
@@ -15,4 +15,11 @@ export const Task = mongoose.model('Task', {
         required: true,
         ref: 'User'
     }
+},{
+    timestamps: true
 })
+
+const TaskModel = mongoose.model('Task', TaskSchema)
+TaskModel.createIndexes()
+
+export const Task = TaskModel
