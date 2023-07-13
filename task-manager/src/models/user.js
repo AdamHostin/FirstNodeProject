@@ -3,6 +3,7 @@ import validator from "validator"
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { Console } from "console"
+import { Task } from "./task.js"
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -103,6 +104,11 @@ userSchema.pre('save', async function (next){
     if(this.isModified('password')){
         this.password = await bcrypt.hash(this.password,8)
     }
+    next()
+})
+
+userSchema.pre('deleteOne', { document: true, query: false }, async function (next){
+    await Task.deleteMany({owner: this._id})
     next()
 })
 
