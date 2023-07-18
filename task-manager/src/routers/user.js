@@ -2,6 +2,7 @@ import express from "express";
 import { User } from "../models/user.js";
 import * as utils from '../utils/utils.js'
 import * as auth from '../middleware/auth.js'
+import multer from "multer";
 
 /* const hashPsswd = async (password) => {
     return bcrypt.hash(password,8)
@@ -12,6 +13,9 @@ const isMatchingPsswd = async (hash, password) => {
 } */
 
 export const router = new express.Router()
+const upload = multer({
+    dest: 'avatars'
+})
 
 router.post('/users', async (req, res) =>{
     console.log(req.body)
@@ -60,6 +64,10 @@ router.post('/users/logoutAll', auth.auth, async (req, res) =>{
         console.log(e)
         res.status(500).send({ error: 'Unable to logout', tokens: req.user.tokens})
     }
+})
+
+router.post('/users/me/avatar', upload.single('avatar'), async (req,res) =>{
+    res.send()
 })
 
 router.get('/users/me', auth.auth, async (req, res) => {
